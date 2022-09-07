@@ -9,20 +9,20 @@
 
   <artifactId>cc-gl</artifactId>
   <name>creative computing opengl</name>
-  
-  <repositories>
-        <!-- This repository should be used only for unreleased development versions, typically all release candidates and post builds -->
-        <repository>
-            <id>jogamp</id>
-            <url>http://jogamp.org/deployment/maven</url>
-        </repository>
-    </repositories>
-  
-    <properties>
-        <jogamp.version>2.3.1</jogamp.version>
-    </properties>
 
-  
+  <repositories>
+    <!-- This repository should be used only for unreleased development versions, typically all release candidates and post builds -->
+    <repository>
+      <id>jogamp</id>
+      <url>https://jogamp.org/deployment/maven</url>
+    </repository>
+  </repositories>
+
+  <properties>
+    <jogamp.version>2.3.1</jogamp.version>
+  </properties>
+
+
   <dependencies>
 
     <dependency>
@@ -34,7 +34,7 @@
       <groupId>org.jogamp.gluegen</groupId>
       <artifactId>gluegen-rt</artifactId>
       <version>${jogamp.version}</version>
-	  <classifier>natives-${NATIVE_LIB_CLASSIFIER}</classifier>
+      <classifier>natives-${NATIVE_LIB_CLASSIFIER}</classifier>
     </dependency>
     <dependency>
       <groupId>org.jogamp.jogl</groupId>
@@ -45,7 +45,7 @@
       <groupId>org.jogamp.jogl</groupId>
       <artifactId>jogl-all</artifactId>
       <version>${jogamp.version}</version>
-	  <classifier>natives-${NATIVE_LIB_CLASSIFIER}</classifier>
+      <classifier>natives-${NATIVE_LIB_CLASSIFIER}</classifier>
     </dependency>
 
     <dependency>
