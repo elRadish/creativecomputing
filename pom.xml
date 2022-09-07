@@ -346,7 +346,7 @@
     <repositories>
       <repository>
         <id>jogamp</id>
-        <url>http://jogamp.org/deployment/maven</url>
+        <url>https://jogamp.org/deployment/maven</url>
       </repository>
 	   <repository>
       <id>sonatype-nexus-snapshots</id>
