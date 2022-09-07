@@ -52,11 +52,11 @@
       <version>2.2.10.4-0</version>
     </dependency>
   </dependencies>
-  
+
   <repositories>
     <repository>
       <id>librealsense</id>
-      <url>https://dl.bintray.com/edwinrndr/librealsense</url>
+      <url>https://maven.openrndr.org</url>
     </repository>
   </repositories>
 </project>

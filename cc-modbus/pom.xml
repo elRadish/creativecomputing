@@ -9,14 +9,14 @@
 
   <artifactId>cc-modbus</artifactId>
   <name>creative computing modbus</name>
-  
+
   <repositories>
     <repository>
       <id>sparetimelabs</id>
       <url>http://www.sparetimelabs.com/maven2/</url>
     </repository>
-  </repositories> 
-  
+  </repositories>
+
   <dependencies>
     <dependency>
       <groupId>cc.creativecomputing</groupId>
@@ -34,10 +34,10 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.sparetimelabs</groupId>
+      <groupId>com.github.purejavacomm</groupId>
       <artifactId>purejavacomm</artifactId>
-      <version>1.0.0</version>
-   </dependency>
+      <version>1.0.1.RELEASE</version>
+    </dependency>
   </dependencies>
-  
+
 </project>
