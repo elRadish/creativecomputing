@@ -72,12 +72,12 @@ public class CCHandTracker {
 		public CCVector2 tip = new CCVector2();
 		public CCVector2 center = new CCVector2();
 		public CCVector2 progressCenter = new CCVector2();
-		private double startAngle = 0;
-		private double jitter = 0;
+		protected double startAngle = 0;
+		protected double jitter = 0;
 		public int validFrames = 0;
 		
-		private double restFrames = 0;
-		private double progress = 0;
+		protected double restFrames = 0;
+		protected double progress = 0;
 		
 		
 		
@@ -174,32 +174,32 @@ public class CCHandTracker {
 	@CCProperty(name = "min length", min = 0, max = 500)
 	private double _cMinLength = 30;
 	@CCProperty(name = "tip smooth", min = 0, max = 1)
-	private double _cTipSmooth = 0;
+	protected double _cTipSmooth = 0;
 	@CCProperty(name = "jitter smooth", min = 0, max = 1)
-	private double _cJitterSmooth = 0;
+	protected double _cJitterSmooth = 0;
 	
 	@CCProperty(name = "min rest time", min = 0, max = 200)
-	private double _cMinRestFrames = 30;
+	protected double _cMinRestFrames = 30;
 	@CCProperty(name = "min size")
 	private double _cMinSize = 2;
 	@CCProperty(name = "max jitter", min = 0, max = 100)
-	private double _cMaxJitter = 30;
+	protected double _cMaxJitter = 30;
 	@CCProperty(name = "min valid frames", min = 0, max = 100)
-	private double _cMinValidFrames = 20;
+	protected double _cMinValidFrames = 20;
 
 	@CCProperty(name = "progress angle", min = 0, max = 360)
-	private double _cProgressAngle = 0;
+	protected double _cProgressAngle = 0;
 
 	@CCProperty(name = "selection radius", min = 0, max = 50)
-	private double _cSelectionRadius = 20;
+	protected double _cSelectionRadius = 20;
 	@CCProperty(name = "line strength", min = 0, max = 50)
-	private double _cLineStrength = 0;
+	protected double _cLineStrength = 0;
 	@CCProperty(name = "line color")
-	private CCColor _cLineColor = new CCColor();
+	protected CCColor _cLineColor = new CCColor();
 	@CCProperty(name = "progress strength", min = 0, max = 50)
-	private double _cProgressStrength = 0;
+	protected double _cProgressStrength = 0;
 	@CCProperty(name = "progress color")
-	private CCColor _cProgressColor = new CCColor();
+	protected CCColor _cProgressColor = new CCColor();
 	
 	private MatVector _myContours;
 	
