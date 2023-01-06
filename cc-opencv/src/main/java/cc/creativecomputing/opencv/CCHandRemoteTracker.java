@@ -19,6 +19,7 @@ import cc.creativecomputing.graphics.CCGraphics;
 import cc.creativecomputing.graphics.texture.CCTexture;
 import cc.creativecomputing.math.CCColor;
 import cc.creativecomputing.math.CCMath;
+import cc.creativecomputing.math.CCTransform;
 import cc.creativecomputing.math.CCVector2;
 import cc.creativecomputing.math.CCVector3;
 import cc.creativecomputing.opencv.CCHandTracker.CCFixedTipEvent;
@@ -80,11 +81,15 @@ public class CCHandRemoteTracker {
 	int h = 1080;
 	final int PORT = 1234;
 	
+	private CCTransform _myTransform = new CCTransform();
+
+	
 	public CCListenerManager<CCFixedTipEvent> fixedTipEvents = CCListenerManager.create(CCFixedTipEvent.class);
 	private CCHandInfo theLastHand = new CCHandInfo();
 
 	protected ArrayList<CCHandInfo> _myHands  = new ArrayList<CCHandInfo>();
 	String[] fingerNames = new String[] {"THUMB","INDEX_FINGER", "MIDDLE_FINGER", "RING_FINGER", "PINKY"};
+//	String[] fingerNames = new String[] {  "PINKY", "RING_FINGER", "MIDDLE_FINGER", "INDEX_FINGER", "THUMB"};
 
 	
 	Runnable receiver = new Runnable() {
@@ -199,12 +204,23 @@ public class CCHandRemoteTracker {
 	}
 
 	public void drawDebug(CCGraphics g) {
+		g.applyTransform(transform());
+		g.popMatrix();
+		g.color(CCColor.YELLOW, 0.5);
+		g.ellipse(new CCVector2(0,0),14,14, true);
+		
+		g.ellipse(new CCVector2(1,1200),10,10, true);
+		g.ellipse(new CCVector2(1920,1),10,10, false);
+		g.ellipse(new CCVector2(1920,1200),10,10, false);
+		g.pushMatrix();
+
 		g.color(255);
 		for(CCHandInfo myInfo:_myHands) {
 			drawFingerTips(myInfo, g);
 		}
 
 		if(_cDrawSelection)drawSelection(g);
+
 	}
 	
 	public List<CCHandInfo> hands(){
@@ -212,6 +228,16 @@ public class CCHandRemoteTracker {
 	}
 
 	public void drawSelection(CCGraphics g) {
+		g.applyTransform(transform());
+		g.popMatrix();
+		g.color(CCColor.YELLOW, 0.5);
+		g.ellipse(new CCVector2(0,0),14,14, true);
+		
+		g.ellipse(new CCVector2(1,1080),10,10, true);
+		g.ellipse(new CCVector2(1440,1),10,10, false);
+		g.ellipse(new CCVector2(1440,1080),10,10, false);
+		g.pushMatrix();
+		
 		for(CCHandInfo myInfo:_myHands) {
 			if(myInfo.tip.isZero())continue;
 			if(myInfo.validFrames < _cMinValidFrames) {
@@ -246,6 +272,10 @@ public class CCHandRemoteTracker {
 	}
 	
 	
+	private CCTransform transform() {
+		return _myTransform;
+	}
+
 	public void isInDebug(boolean isInDebug) {
 		_myIsInDebug = isInDebug;
 	}
