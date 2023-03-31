@@ -77,13 +77,13 @@ public class CCHandRemoteTracker {
 	@CCProperty(name = "calibrate")
 	private boolean _cCalibrate = false;
 	
-	@CCProperty(name = "hscale", min = 1, max = 3000)
-	protected double _cHScale = 2747;//1.42;// 1.9;
-	protected double _cVScale = 1974;//1.75;//1.72;
+	//@CCProperty(name = "hscale", min = 1, max = 3000)
+	protected double _cHScale = 2000;//1.42;// 1.9;
+	protected double _cVScale = 1000;//1.75;//1.72;
 
-	@CCProperty(name = "xoff", min = -1000, max = 1000)
+	//@CCProperty(name = "xoff", min = -1000, max = 1000)
 	protected int xOffset = -347;
-	@CCProperty(name = "yoff", min = -1000, max = 1000)
+	//@CCProperty(name = "yoff", min = -1000, max = 1000)
 	protected int yOffset = -14;
 	
 	private boolean _myIsInDebug = false;
@@ -179,6 +179,7 @@ public class CCHandRemoteTracker {
 	}
 	
 	private double mapX(double x) {
+		System.out.println(_cHScale);
 		return _cHFlip ? tableAppW-xOffset - (x * _cHScale) : x * _cHScale + xOffset ;
 	}
 	
@@ -232,9 +233,8 @@ public class CCHandRemoteTracker {
 			if (_cCalibrate) {
 				if (calibPoint < 4) {				
 					calibrationPoints[calibPoint++] = new CCVector2(rawTipX, rawTipY);
-				} else {
-					calculateCalibration();
-				}
+					if (calibPoint == 4)calculateCalibration();
+				} 
 			} 
 		}
 	}
@@ -250,6 +250,7 @@ public class CCHandRemoteTracker {
 		_cHScale = scH;
 		xOffset = (int) -offX;
 		yOffset = (int) -offY;
+		System.out.println("CALC");
 	}
 
 
