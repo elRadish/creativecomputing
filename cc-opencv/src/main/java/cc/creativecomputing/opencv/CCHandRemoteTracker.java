@@ -134,8 +134,6 @@ public class CCHandRemoteTracker {
 					try {
 						ds.receive(packet);
 						JsonObject handData = parser.parse(new String(packet.getData()).substring(packet.getOffset(), packet.getLength()).trim().strip()).getAsJsonObject();
-
-						//System.out.println(handData.toString());
 					
 						CCHandInfo hand = new CCHandInfo();
 						hand.isHand = true;
@@ -144,10 +142,7 @@ public class CCHandRemoteTracker {
 						
 						hand.tip.x = mapX(handData.get("INDEX_FINGER_TIP").getAsJsonArray().get(0).getAsDouble());
 						hand.tip.y = mapY(handData.get("INDEX_FINGER_TIP").getAsJsonArray().get(1).getAsDouble());
-					
-						//hand.tip.x = handData.get("INDEX_FINGER_TIP").getAsJsonArray().get(0).getAsDouble();
-						//hand.tip.y = handData.get("INDEX_FINGER_TIP").getAsJsonArray().get(1).getAsDouble();
-						
+
 						hand.center.x =  mapX(handData.get("WRIST").getAsJsonArray().get(0).getAsDouble());
 						hand.center.y =  mapY(handData.get("WRIST").getAsJsonArray().get(0).getAsDouble());
 						
@@ -179,7 +174,6 @@ public class CCHandRemoteTracker {
 	}
 	
 	private double mapX(double x) {
-		System.out.println(_cHScale);
 		return _cHFlip ? tableAppW-xOffset - (x * _cHScale) : x * _cHScale + xOffset ;
 	}
 	
@@ -228,8 +222,7 @@ public class CCHandRemoteTracker {
 		theLastHand.progress = CCMath.saturate(theLastHand.restFrames / _cMinRestFrames);
 		if(myLastRestTime < _cMinRestFrames && theLastHand.restFrames >= _cMinRestFrames) {
 			fixedTipEvents.proxy().event(theLastHand.tip);
-			System.out.println(theLastHand.tip);
-			System.out.println(rawTipX+" "+rawTipY);
+
 			if (_cCalibrate) {
 				if (calibPoint < 4) {				
 					calibrationPoints[calibPoint++] = new CCVector2(rawTipX, rawTipY);
@@ -239,18 +232,13 @@ public class CCHandRemoteTracker {
 		}
 	}
 
-	
-	
 	private void calculateCalibration() {
-		double scH = (tableAppW*0.4 / (calibrationPoints[2].x - calibrationPoints[1].x));
-		double scV = (tableAppH*0.4 / (calibrationPoints[0].y - calibrationPoints[1].y));
-		double offX = calibrationPoints[0].x * scH - (0.3 * tableAppW);
-		double offY = calibrationPoints[1].y * scV - (0.3 * tableAppH);
-		_cVScale = scV;
-		_cHScale = scH;
+		_cVScale =  (tableAppH*0.4 / (calibrationPoints[0].y - calibrationPoints[1].y));
+		_cHScale =  (tableAppW*0.4 / (calibrationPoints[2].x - calibrationPoints[1].x));
+		double offX = calibrationPoints[0].x * _cHScale - (0.3 * tableAppW);
+		double offY = calibrationPoints[1].y * _cVScale - (0.3 * tableAppH);
 		xOffset = (int) -offX;
 		yOffset = (int) -offY;
-		System.out.println("CALC");
 	}
 
 
@@ -276,7 +264,7 @@ public class CCHandRemoteTracker {
 		if (_cCalibrate) {
 			g.text(calibPoint < 4 ? "Calibrate":"Done", new CCVector2(tableAppW/2,tableAppH/2));
 		
-			g.color(CCColor.GREEN, 1.0);
+			g.color(new CCColor(0, 240, 0), 1.0);
 			g.ellipse(new CCVector2(tableAppX1Scaled,tableAppY1Scaled),  10,  10, false);
 			if (calibPoint == 0) {
 				g.ellipse(new CCVector2(tableAppX1Scaled,tableAppY1Scaled), 20 , 20, true);
