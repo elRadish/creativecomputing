@@ -31,7 +31,7 @@ public class CCHandRemoteTracker {
 
 	@CCProperty(name = "rotangle", min = 0, max = 3.14)
 	protected double _cRotAngle = 0;
-	
+
 	@CCProperty(name = "tip smooth", min = 0, max = 1)
 	protected double _cTipSmooth = 0;
 	@CCProperty(name = "jitter smooth", min = 0, max = 1)
@@ -67,56 +67,57 @@ public class CCHandRemoteTracker {
 	private boolean _cDrawFingerTip = true;
 	@CCProperty(name = "tip radius")
 	private double _cTipRadius = 10;
-	
+
 	@CCProperty(name = "vflip")
 	private boolean _cVFlip = false;
-	
+
 	@CCProperty(name = "hflip")
 	private boolean _cHFlip = false;
-	
+
 	@CCProperty(name = "calibrate")
 	private boolean _cCalibrate = false;
-	
-	//@CCProperty(name = "hscale", min = 1, max = 3000)
+
+	@CCProperty(name = "hscale", min = 1, max = 3000, readBack = true)
 	protected double _cHScale = 2000;//1.42;// 1.9;
+	@CCProperty(name = "vscale", min = 1, max = 3000, readBack = true)
 	protected double _cVScale = 1000;//1.75;//1.72;
 
-	//@CCProperty(name = "xoff", min = -1000, max = 1000)
+	@CCProperty(name = "xoff", min = -1000, max = 1000, readBack = true)
 	protected int xOffset = -347;
-	//@CCProperty(name = "yoff", min = -1000, max = 1000)
+	@CCProperty(name = "yoff", min = -1000, max = 1000, readBack = true)
 	protected int yOffset = -14;
-	
+
 	private boolean _myIsInDebug = false;
 	private boolean _myIsInConfig = false;
-	
+
 	final int PORT = 1234;
 	double rawTipX;
 	double rawTipY;
-	
+
 	int calibPoint = 0;
 	CCVector2 calibrationPoints[] = new CCVector2[4];
-	
+
 	double markerScale = 0.7;
 
 	int tableAppX = 0;
 	int tableAppY = 0;
 	int tableAppW = 1920;
 	int tableAppH = 1200;
-	
+
 	int tableAppX1Scaled = (int) (tableAppX + tableAppW * (1-markerScale));
 	int tableAppY1Scaled = (int) (tableAppY + tableAppH * (1-markerScale));
 	int tableAppX2Scaled = (int) (tableAppW - tableAppX1Scaled);
 	int tableAppY2Scaled = (int) (tableAppH - tableAppY1Scaled);
-	
-	
+
+
 	private CCTransform _myTransform = new CCTransform();
-	
+
 	public CCListenerManager<CCFixedTipEvent> fixedTipEvents = CCListenerManager.create(CCFixedTipEvent.class);
 	private CCHandInfo theLastHand = new CCHandInfo();
 
 	protected ArrayList<CCHandInfo> _myHands  = new ArrayList<CCHandInfo>();
 	String[] fingerNames = new String[] {"THUMB","INDEX_FINGER", "MIDDLE_FINGER", "RING_FINGER", "PINKY"};
-	
+
 	Runnable receiver = new Runnable() {
 		boolean running = true;
 		JsonParser parser = new JsonParser();
@@ -134,18 +135,18 @@ public class CCHandRemoteTracker {
 					try {
 						ds.receive(packet);
 						JsonObject handData = parser.parse(new String(packet.getData()).substring(packet.getOffset(), packet.getLength()).trim().strip()).getAsJsonObject();
-					
+
 						CCHandInfo hand = new CCHandInfo();
 						hand.isHand = true;
 						rawTipX = handData.get("INDEX_FINGER_TIP").getAsJsonArray().get(0).getAsDouble();
 						rawTipY = handData.get("INDEX_FINGER_TIP").getAsJsonArray().get(1).getAsDouble();
-						
+
 						hand.tip.x = mapX(handData.get("INDEX_FINGER_TIP").getAsJsonArray().get(0).getAsDouble());
 						hand.tip.y = mapY(handData.get("INDEX_FINGER_TIP").getAsJsonArray().get(1).getAsDouble());
 
 						hand.center.x =  mapX(handData.get("WRIST").getAsJsonArray().get(0).getAsDouble());
 						hand.center.y =  mapY(handData.get("WRIST").getAsJsonArray().get(0).getAsDouble());
-						
+
 						hand.fingerTips = new ArrayList<CCVector3>();
 						for (String finger : fingerNames) {
 							double x = handData.get(finger+"_TIP").getAsJsonArray().get(0).getAsDouble();
@@ -153,7 +154,7 @@ public class CCHandRemoteTracker {
 							double z = handData.get(finger+"_TIP").getAsJsonArray().get(2).getAsDouble();
 							hand.fingerTips.add(new CCVector3(mapX(x),mapY(y),z).rotate(0, 0, 1, _cRotAngle));							
 						}
-						
+
 						_myHands.clear();
 						updateHandInfo(theLastHand, hand);
 						_myHands.add(theLastHand);
@@ -167,16 +168,16 @@ public class CCHandRemoteTracker {
 			}
 		};
 	};
-	
+
 	Thread receiverThread = new Thread(receiver); 
 	public CCHandRemoteTracker(CCCVVideoIn theVideoIn, Path theMaskTexture) {
 		receiverThread.start();
 	}
-	
+
 	private double mapX(double x) {
 		return _cHFlip ? tableAppW-xOffset - (x * _cHScale) : x * _cHScale + xOffset ;
 	}
-	
+
 	private double mapY(double y) {
 		return _cVFlip ? tableAppH-yOffset - (y * _cVScale) : y * _cVScale + yOffset;
 	}
@@ -251,19 +252,19 @@ public class CCHandRemoteTracker {
 
 		if(_cDrawSelection)drawSelection(g);
 	}
-	
+
 	public List<CCHandInfo> hands(){
 		return _myHands;
 	}
 
-	
+
 	public void drawSelection(CCGraphics g) {
 		g.applyTransform(transform());
 
 		g.popMatrix();
 		if (_cCalibrate) {
 			g.text(calibPoint < 4 ? "Calibrate":"Done", new CCVector2(tableAppW/2,tableAppH/2));
-		
+
 			g.color(new CCColor(0, 240, 0), 1.0);
 			g.ellipse(new CCVector2(tableAppX1Scaled,tableAppY1Scaled),  10,  10, false);
 			if (calibPoint == 0) {
@@ -290,7 +291,7 @@ public class CCHandRemoteTracker {
 			calibPoint = 0;
 		}
 		g.pushMatrix();
-		
+
 		for(CCHandInfo myInfo:_myHands) {
 			if(myInfo.tip.isZero())continue;
 			if(myInfo.validFrames < _cMinValidFrames) {
@@ -323,8 +324,8 @@ public class CCHandRemoteTracker {
 		}
 		g.color(1d);
 	}
-	
-	
+
+
 	private CCTransform transform() {
 		return _myTransform;
 	}
@@ -332,24 +333,24 @@ public class CCHandRemoteTracker {
 	public void isInDebug(boolean isInDebug) {
 		_myIsInDebug = isInDebug;
 	}
-	
+
 	public void isInConfig(boolean isInConfig) {
 		_myIsInConfig = isInConfig;
 	}
 
 	public void active(boolean _myIsTrackingActive) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void updateDebugTexture(boolean b) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void update(CCAnimator theAnimator) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public CCTexture debugTexture() {
@@ -359,6 +360,6 @@ public class CCHandRemoteTracker {
 
 	public void preDisplay(CCGraphics g) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }
