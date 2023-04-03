@@ -27,7 +27,6 @@ import org.bytedeco.javacpp.opencv_core.MatVector;
 import cc.creativecomputing.app.modules.CCAnimator;
 import cc.creativecomputing.core.CCProperty;
 import cc.creativecomputing.core.events.CCListenerManager;
-import cc.creativecomputing.core.logging.CCLog;
 import cc.creativecomputing.graphics.CCDrawMode;
 import cc.creativecomputing.graphics.CCGraphics;
 import cc.creativecomputing.graphics.texture.CCTexture2D;
@@ -38,9 +37,9 @@ import cc.creativecomputing.math.CCTransform;
 import cc.creativecomputing.math.CCVector2;
 import cc.creativecomputing.math.CCVector2i;
 import cc.creativecomputing.math.CCVector3;
-import cc.creativecomputing.math.filter.CCOneEuroFilter;
 import cc.creativecomputing.math.spline.CCLinearSpline;
 import cc.creativecomputing.math.spline.CCSimplify3D;
+import cc.creativecomputing.opencv.CCHandTracker.CCFixedTipEvent;
 import cc.creativecomputing.opencv.filtering.CCAbsDifference;
 import cc.creativecomputing.opencv.filtering.CCBackgroundSubtractorKNN;
 import cc.creativecomputing.opencv.filtering.CCBackgroundSubtractorMOG2;
@@ -54,7 +53,7 @@ import cc.creativecomputing.opencv.filtering.CCMorphologyFilter;
 import cc.creativecomputing.opencv.filtering.CCRotate90;
 import cc.creativecomputing.opencv.filtering.CCThreshold;;
 
-public class CCHandTracker {
+public class CCHandTracker implements CCIHandTracker {
 	
 	public static interface CCFixedTipEvent{
 		public void event(CCVector2 theTip);
@@ -1017,6 +1016,10 @@ public class CCHandTracker {
 //		return _myBackgroundTexture;
 //	}
 
+	@Override
+	public void addFixedTipevent(CCFixedTipEvent event) {
+		fixedTipEvents.add(event);
+	}
 	
 
 }

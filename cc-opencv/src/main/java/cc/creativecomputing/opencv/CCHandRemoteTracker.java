@@ -24,10 +24,9 @@ import cc.creativecomputing.math.CCVector2;
 import cc.creativecomputing.math.CCVector3;
 import cc.creativecomputing.opencv.CCHandTracker.CCFixedTipEvent;
 import cc.creativecomputing.opencv.CCHandTracker.CCHandInfo;
-import cc.creativecomputing.opencv.filtering.CCFlip;
 
 
-public class CCHandRemoteTracker {
+public class CCHandRemoteTracker implements CCIHandTracker  {
 
 	@CCProperty(name = "rotangle", min = 0, max = 3.14)
 	protected double _cRotAngle = 0;
@@ -89,88 +88,86 @@ public class CCHandRemoteTracker {
 
 	private boolean _myIsInDebug = false;
 	private boolean _myIsInConfig = false;
+	public CCListenerManager<CCFixedTipEvent> fixedTipEvents = CCListenerManager.create(CCFixedTipEvent.class);
 
-	final int PORT = 1234;
 	double rawTipX;
 	double rawTipY;
 
-	int calibPoint = 0;
-	CCVector2 calibrationPoints[] = new CCVector2[4];
+	private int currentCalibrationPoint = 0;
+	private CCVector2 calibrationPoints[] = new CCVector2[4];
 
-	double markerScale = 0.7;
+	private double markerScale = 0.7;
 
-	int tableAppX = 0;
-	int tableAppY = 0;
-	int tableAppW = 1920;
-	int tableAppH = 1200;
+	private int tableAppX = 0;
+	private int tableAppY = 0;
+	private int tableAppW = 1920;
+	private int tableAppH = 1200;
 
-	int tableAppX1Scaled = (int) (tableAppX + tableAppW * (1-markerScale));
-	int tableAppY1Scaled = (int) (tableAppY + tableAppH * (1-markerScale));
-	int tableAppX2Scaled = (int) (tableAppW - tableAppX1Scaled);
-	int tableAppY2Scaled = (int) (tableAppH - tableAppY1Scaled);
-
+	private int tableAppX1Scaled = (int) (tableAppX + tableAppW * (1-markerScale));
+	private int tableAppY1Scaled = (int) (tableAppY + tableAppH * (1-markerScale));
+	private int tableAppX2Scaled = (int) (tableAppW - tableAppX1Scaled);
+	private int tableAppY2Scaled = (int) (tableAppH - tableAppY1Scaled);
 
 	private CCTransform _myTransform = new CCTransform();
 
-	public CCListenerManager<CCFixedTipEvent> fixedTipEvents = CCListenerManager.create(CCFixedTipEvent.class);
 	private CCHandInfo theLastHand = new CCHandInfo();
 
 	protected ArrayList<CCHandInfo> _myHands  = new ArrayList<CCHandInfo>();
-	String[] fingerNames = new String[] {"THUMB","INDEX_FINGER", "MIDDLE_FINGER", "RING_FINGER", "PINKY"};
+	private String[] fingerNames = new String[] {"THUMB","INDEX_FINGER", "MIDDLE_FINGER", "RING_FINGER", "PINKY"};
 
-	Runnable receiver = new Runnable() {
-		boolean running = true;
-		JsonParser parser = new JsonParser();
-		byte[] receiveBuffer = new byte[65535];
+	public CCHandRemoteTracker(int uDPPort) {
+		Runnable receiver = new Runnable() {
+			boolean running = true;
+			JsonParser parser = new JsonParser();
+			byte[] receiveBuffer = new byte[65535];
 
-		DatagramPacket packet = new DatagramPacket(receiveBuffer, receiveBuffer.length);
+			DatagramPacket packet = new DatagramPacket(receiveBuffer, receiveBuffer.length);
 
-		@Override
-		public void run() {
-			DatagramSocket ds;
-			try {
-				ds = new DatagramSocket(PORT);
+			@Override
+			public void run() {
+				DatagramSocket ds;
+				try {
+					ds = new DatagramSocket(uDPPort);
 
-				while(running) {
-					try {
-						ds.receive(packet);
-						JsonObject handData = parser.parse(new String(packet.getData()).substring(packet.getOffset(), packet.getLength()).trim().strip()).getAsJsonObject();
+					while(running) {
+						try {
+							ds.receive(packet);
+							JsonObject handData = parser.parse(new String(packet.getData()).substring(packet.getOffset(), packet.getLength()).trim().strip()).getAsJsonObject();
 
-						CCHandInfo hand = new CCHandInfo();
-						hand.isHand = true;
-						rawTipX = handData.get("INDEX_FINGER_TIP").getAsJsonArray().get(0).getAsDouble();
-						rawTipY = handData.get("INDEX_FINGER_TIP").getAsJsonArray().get(1).getAsDouble();
+							CCHandInfo hand = new CCHandInfo();
+							hand.isHand = true;
+							rawTipX = handData.get("INDEX_FINGER_TIP").getAsJsonArray().get(0).getAsDouble();
+							rawTipY = handData.get("INDEX_FINGER_TIP").getAsJsonArray().get(1).getAsDouble();
 
-						hand.tip.x = mapX(handData.get("INDEX_FINGER_TIP").getAsJsonArray().get(0).getAsDouble());
-						hand.tip.y = mapY(handData.get("INDEX_FINGER_TIP").getAsJsonArray().get(1).getAsDouble());
+							hand.tip.x = mapX(handData.get("INDEX_FINGER_TIP").getAsJsonArray().get(0).getAsDouble());
+							hand.tip.y = mapY(handData.get("INDEX_FINGER_TIP").getAsJsonArray().get(1).getAsDouble());
 
-						hand.center.x =  mapX(handData.get("WRIST").getAsJsonArray().get(0).getAsDouble());
-						hand.center.y =  mapY(handData.get("WRIST").getAsJsonArray().get(0).getAsDouble());
+							hand.center.x =  mapX(handData.get("WRIST").getAsJsonArray().get(0).getAsDouble());
+							hand.center.y =  mapY(handData.get("WRIST").getAsJsonArray().get(0).getAsDouble());
 
-						hand.fingerTips = new ArrayList<CCVector3>();
-						for (String finger : fingerNames) {
-							double x = handData.get(finger+"_TIP").getAsJsonArray().get(0).getAsDouble();
-							double y = handData.get(finger+"_TIP").getAsJsonArray().get(1).getAsDouble();
-							double z = handData.get(finger+"_TIP").getAsJsonArray().get(2).getAsDouble();
-							hand.fingerTips.add(new CCVector3(mapX(x),mapY(y),z).rotate(0, 0, 1, _cRotAngle));							
+							hand.fingerTips = new ArrayList<CCVector3>();
+							for (String finger : fingerNames) {
+								double x = handData.get(finger+"_TIP").getAsJsonArray().get(0).getAsDouble();
+								double y = handData.get(finger+"_TIP").getAsJsonArray().get(1).getAsDouble();
+								double z = handData.get(finger+"_TIP").getAsJsonArray().get(2).getAsDouble();
+								hand.fingerTips.add(new CCVector3(mapX(x),mapY(y),z).rotate(0, 0, 1, _cRotAngle));							
+							}
+
+							_myHands.clear();
+							updateHandInfo(theLastHand, hand);
+							_myHands.add(theLastHand);
+						} catch (Exception e) {
+							e.printStackTrace();
 						}
-
-						_myHands.clear();
-						updateHandInfo(theLastHand, hand);
-						_myHands.add(theLastHand);
-					} catch (Exception e) {
-						e.printStackTrace();
 					}
+				} catch (SocketException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
-			} catch (SocketException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+			};
 		};
-	};
 
-	Thread receiverThread = new Thread(receiver); 
-	public CCHandRemoteTracker(CCCVVideoIn theVideoIn, Path theMaskTexture) {
+		Thread receiverThread = new Thread(receiver); 
 		receiverThread.start();
 	}
 
@@ -225,9 +222,11 @@ public class CCHandRemoteTracker {
 			fixedTipEvents.proxy().event(theLastHand.tip);
 
 			if (_cCalibrate) {
-				if (calibPoint < 4) {				
-					calibrationPoints[calibPoint++] = new CCVector2(rawTipX, rawTipY);
-					if (calibPoint == 4)calculateCalibration();
+				if (currentCalibrationPoint < 4) {				
+					calibrationPoints[currentCalibrationPoint++] = new CCVector2(rawTipX, rawTipY);
+					if (currentCalibrationPoint == 4) {
+						calculateCalibration();
+					}
 				} 
 			} 
 		}
@@ -243,6 +242,7 @@ public class CCHandRemoteTracker {
 	}
 
 
+	@Override
 	public void drawDebug(CCGraphics g) {
 		g.applyTransform(transform());
 		g.color(255);
@@ -253,33 +253,35 @@ public class CCHandRemoteTracker {
 		if(_cDrawSelection)drawSelection(g);
 	}
 
+	@Override
 	public List<CCHandInfo> hands(){
 		return _myHands;
 	}
 
 
+	@Override
 	public void drawSelection(CCGraphics g) {
 		g.applyTransform(transform());
 
 		g.popMatrix();
 		if (_cCalibrate) {
-			g.text(calibPoint < 4 ? "Calibrate":"Done", new CCVector2(tableAppW/2,tableAppH/2));
+			g.text(currentCalibrationPoint < 4 ? "Calibrate":"Done", new CCVector2(tableAppW/2,tableAppH/2));
 
 			g.color(new CCColor(0, 240, 0), 1.0);
 			g.ellipse(new CCVector2(tableAppX1Scaled,tableAppY1Scaled),  10,  10, false);
-			if (calibPoint == 0) {
+			if (currentCalibrationPoint == 0) {
 				g.ellipse(new CCVector2(tableAppX1Scaled,tableAppY1Scaled), 20 , 20, true);
 			}
 			g.ellipse(new CCVector2(tableAppX1Scaled,tableAppY2Scaled), 10,10, false);
-			if (calibPoint == 1) {
+			if (currentCalibrationPoint == 1) {
 				g.ellipse(new CCVector2(tableAppX1Scaled,tableAppY2Scaled), 20 , 20, true);
 			}
 			g.ellipse(new CCVector2(tableAppX2Scaled,tableAppY2Scaled), 10,10 , false);
-			if (calibPoint == 2) {
+			if (currentCalibrationPoint == 2) {
 				g.ellipse(new CCVector2(tableAppX2Scaled,tableAppY2Scaled), 20 , 20, true);
 			}
 			g.ellipse(new CCVector2(tableAppX2Scaled,tableAppY1Scaled), 10,10 , false);
-			if (calibPoint == 3) {
+			if (currentCalibrationPoint == 3) {
 				g.ellipse(new CCVector2(tableAppX2Scaled,tableAppY1Scaled), 20 , 20, true);
 			}
 			if (_cDrawFingerTip) {
@@ -288,7 +290,7 @@ public class CCHandRemoteTracker {
 				}
 			}
 		} else {
-			calibPoint = 0;
+			currentCalibrationPoint = 0;
 		}
 		g.pushMatrix();
 
@@ -330,36 +332,48 @@ public class CCHandRemoteTracker {
 		return _myTransform;
 	}
 
+	@Override
 	public void isInDebug(boolean isInDebug) {
 		_myIsInDebug = isInDebug;
 	}
 
+	@Override
 	public void isInConfig(boolean isInConfig) {
 		_myIsInConfig = isInConfig;
 	}
 
+	@Override
 	public void active(boolean _myIsTrackingActive) {
 		// TODO Auto-generated method stub
 
 	}
 
+	@Override
 	public void updateDebugTexture(boolean b) {
 		// TODO Auto-generated method stub
 
 	}
 
+	@Override
 	public void update(CCAnimator theAnimator) {
 		// TODO Auto-generated method stub
 
 	}
 
+	@Override
 	public CCTexture debugTexture() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	@Override
 	public void preDisplay(CCGraphics g) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public void addFixedTipevent(CCFixedTipEvent event) {
+		fixedTipEvents.add(event);
 	}
 }

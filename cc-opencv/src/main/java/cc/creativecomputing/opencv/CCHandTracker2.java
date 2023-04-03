@@ -22,6 +22,7 @@ import cc.creativecomputing.core.CCProperty;
 import cc.creativecomputing.core.events.CCListenerManager;
 import cc.creativecomputing.graphics.CCDrawMode;
 import cc.creativecomputing.graphics.CCGraphics;
+import cc.creativecomputing.graphics.texture.CCTexture;
 import cc.creativecomputing.graphics.texture.CCTexture2D;
 import cc.creativecomputing.io.CCNIOUtil;
 import cc.creativecomputing.math.CCColor;
@@ -30,16 +31,13 @@ import cc.creativecomputing.math.CCVector2;
 import cc.creativecomputing.math.CCVector3;
 import cc.creativecomputing.math.filter.CCOneEuroFilter;
 import cc.creativecomputing.math.spline.CCSimplify3D;
+import cc.creativecomputing.opencv.CCHandTracker.CCFixedTipEvent;
 import cc.creativecomputing.opencv.filtering.CCBlur;
 import cc.creativecomputing.opencv.filtering.CCCVShaderFilter;
 import cc.creativecomputing.opencv.filtering.CCMorphologyFilter;
 import cc.creativecomputing.opencv.filtering.CCThreshold;;
 
-public class CCHandTracker2 {
-	
-	public static interface CCFixedTipEvent{
-		public void event(CCVector2 theTip);
-	}
+public class CCHandTracker2 implements CCIHandTracker {
 	
 	public static class CCVectorAndID implements Comparable<CCVectorAndID>{
 		public final CCVector3 vector;
@@ -604,4 +602,41 @@ _myTipInRest = myTipInRest;
 //		_myTip.x = _cTipFilter.process(0, _myTip.x, theAnimator.deltaTime());
 //		_myTip.y = _cTipFilter.process(0, _myTip.y, theAnimator.deltaTime());
 	}
+
+	@Override
+	public List<cc.creativecomputing.opencv.CCHandTracker.CCHandInfo> hands() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void isInDebug(boolean isInDebug) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void isInConfig(boolean isInConfig) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void updateDebugTexture(boolean b) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void addFixedTipevent(CCFixedTipEvent event) {
+		fixedTipEvents.add(event);
+	}
+
+	@Override
+	public CCTexture debugTexture() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	
 }
